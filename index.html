@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Degree Domain Interest Finder</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top left, #0f172a, #090d16, #020617);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Glassmorphism Container */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 28px 22px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 35px rgba(56, 189, 248, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #38bdf8 0%, #10b981 50%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+            filter: drop-shadow(0 2px 8px rgba(56, 189, 248, 0.25));
+        }
+
+        p.subtitle {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            line-height: 1.4;
+            font-weight: 600;
+        }
+
+        /* FIELD SELECTION SCREEN */
+        .field-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .field-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 18px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field-card:hover {
+            transform: translateY(-3px);
+            border-color: #38bdf8;
+            background: rgba(30, 41, 59, 0.95);
+            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.25);
+        }
+
+        .field-icon {
+            font-size: 1.8rem;
+            margin-bottom: 4px;
+        }
+
+        .field-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .field-desc {
+            font-size: 0.82rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 4px;
+            margin-bottom: 18px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #38bdf8, #10b981, #f59e0b);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Interactive Scenario Card */
+        .card {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 22px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            margin-bottom: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        }
+
+        .card-img-wrapper {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .domain-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #38bdf8;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 5px 11px;
+            border-radius: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .card-body {
+            padding: 18px;
+        }
+
+        .card-title {
+            font-size: 1.18rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 15px 8px;
+            border-radius: 16px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-action:active {
+            transform: scale(0.96);
+        }
+
+        .btn-pass {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-pass:hover {
+            box-shadow: 0 10px 22px rgba(239, 68, 68, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-love {
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-love:hover {
+            box-shadow: 0 10px 22px rgba(16, 185, 129, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Results Display */
+        .result-box {
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 22px;
+            padding: 24px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        }
+
+        .result-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #38bdf8, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .result-desc {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+            line-height: 1.55;
+        }
+
+        .score-bar-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .score-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .score-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .score-track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #38bdf8, #10b981);
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .tag {
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #38bdf8;
+        }
+
+        .btn-reset {
+            margin-top: 22px;
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            border-radius: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <h1 id="main-heading">Domain Finder</h1>
+        <p class="subtitle" id="sub-heading">Discover your ideal career path in simple, everyday language.</p>
+    </header>
+
+    <!-- SCREEN 1: FIELD SELECTION -->
+    <div id="screen-fields" class="field-grid">
+        <div class="field-card" onclick="startAssessment('tech')">
+            <div class="field-icon">💻</div>
+            <div class="field-title">Tech, CS & IT</div>
+            <div class="field-desc">AI, Apps & Websites, Cloud Servers, Hacking & Security, Big Data.</div>
+        </div>
+
+        <div class="field-card" onclick="startAssessment('business')">
+            <div class="field-icon">🚀</div>
+            <div class="field-title">Business & Management</div>
+            <div class="field-desc">Building Products, Marketing, Hiring People, Shipping Products, Business Strategy.</div>
+        </div>
+
+        <div class="field-card" onclick="startAssessment('finance')">
+            <div class="field-icon">📈</div>
+            <div class="field-title">Finance, Investment & Fintech</div>
+            <div class="field-desc">Company Deals, Money & Budgets, Tech Apps for Banking, Stock Market, Risk Checking.</div>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: SCENARIO SWIPING -->
+    <div id="screen-cards" class="hidden" style="width: 100%;">
+        <div class="progress-bar-container">
+            <div id="progress-fill" class="progress-bar-fill"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-img-wrapper">
+                <img id="card-img" src="" alt="Domain Work Scenario">
+                <div id="domain-badge" class="domain-badge"></div>
+            </div>
+            <div class="card-body">
+                <div id="card-title" class="card-title"></div>
+                <div id="card-desc" class="card-desc"></div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-action btn-pass" onclick="handleChoice(false)">✖ Not for me</button>
+            <button class="btn-action btn-love" onclick="handleChoice(true)">♥ Love the vibe</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 3: RESULT SCREEN -->
+    <div id="screen-result" class="hidden" style="width: 100%;">
+        <div id="result-card-box" class="result-box">
+            <div id="res-title" class="result-title"></div>
+            <div id="res-desc" class="result-desc"></div>
+
+            <div id="breakdown-section">
+                <p style="font-size: 0.78rem; color: #cbd5e1; margin-bottom: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Your Match Breakdown:</p>
+                <div id="score-bars-container" class="score-bar-group"></div>
+
+                <div style="margin-top: 20px;">
+                    <p style="font-size: 0.78rem; color: #cbd5e1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Job Roles You Would Enjoy:</p>
+                    <div id="tag-container" class="tag-list"></div>
+                </div>
+            </div>
+
+            <button class="btn-reset" onclick="resetApp()">↺ Choose Another Field</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // -------------------------------------------------------------
+    // DATABASE: Simplified Explanations for Degree Students
+    // -------------------------------------------------------------
+    const database = {
+        tech: {
+            fieldName: "Tech, CS & IT",
+            domains: {
+                "AI & Machine Learning": {
+                    desc: "You love teaching computers how to think and make smart decisions on their own—like Netflix recommending movies or ChatGPT answering questions.",
+                    roles: ["AI Engineer", "ML Specialist", "Prompt Engineer", "AI Researcher"]
+                },
+                "Full-Stack Web Development": {
+                    desc: "You love designing cool websites that look great on screen AND writing the hidden computer code that makes them actually work.",
+                    roles: ["Frontend Developer", "Backend Developer", "Full-Stack Developer", "Web App Designer"]
+                },
+                "Cloud Architecture & DevOps": {
+                    desc: "You like making sure websites and apps stay online 24/7 without crashing, even when millions of people open them at the same time.",
+                    roles: ["DevOps Engineer", "Cloud Engineer", "System Specialist", "Server Admin"]
+                },
+                "Cyber Security": {
+                    desc: "You act like a digital security guard or ethical hacker who protects apps, databases, and private user details from bad guys and cyber criminals.",
+                    roles: ["Ethical Hacker", "Security Specialist", "Cyber Detective", "System Guard"]
+                },
+                "Data Engineering & Analytics": {
+                    desc: "You like organizing massive piles of messy information so companies can clearly see what users are doing and make smart choices.",
+                    roles: ["Data Engineer", "Database Specialist", "Data Analyst", "Data Pipeline Builder"]
+                }
+            },
+            scenarios: [
+                // AI & ML
+                { domain: "AI & Machine Learning", title: "Smart Predictions", desc: "Teaching a computer program to look at past shopping habits and automatically guess what product a customer will want to buy next.", img: "https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=600&q=80" },
+                { domain: "AI & Machine Learning", title: "Smart Chatbots", desc: "Building and training AI helpers (like ChatGPT) so they can talk naturally with users and answer their questions in seconds.", img: "https://images.unsplash.com/photo-1555255707-c07966088b7b?auto=format&fit=crop&w=600&q=80" },
+                { domain: "AI & Machine Learning", title: "Camera Vision", desc: "Writing computer programs that let smart cameras recognize human faces, road signs, or objects in real-time.", img: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600&q=80" },
+
+                // Full-Stack
+                { domain: "Full-Stack Web Development", title: "Designing Mobile & Web Apps", desc: "Creating smooth buttons, colorful screens, and easy navigation that users see and tap on their phones.", img: "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Full-Stack Web Development", title: "Connecting Systems Behind the Scenes", desc: "Writing backend code that safely saves user passwords, processes payments, and stores accounts in a database.", img: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Full-Stack Web Development", title: "Fixing Slow Websites", desc: "Finding bugs in web code and speeding up website loading times so users don't get frustrated and leave.", img: "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=600&q=80" },
+
+                // Cloud & DevOps
+                { domain: "Cloud Architecture & DevOps", title: "Automating App Updates", desc: "Setting up automated systems that send new features straight to user phones without disrupting the app.", img: "https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Cloud Architecture & DevOps", title: "Handling Heavy Web Traffic", desc: "Configuring online servers (like AWS or Google Cloud) so an app doesn't crash during big sale events.", img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Cloud Architecture & DevOps", title: "Building Cloud Infra with Code", desc: "Writing simple text commands that automatically launch hundreds of virtual computers in the cloud.", img: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=600&q=80" },
+
+                // Cyber Security
+                { domain: "Cyber Security", title: "Ethical Hacking", desc: "Trying to hack into your own company's software on purpose so you can find and fix security gaps before real hackers do.", img: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Cyber Security", title: "Cyber Attack Defense", desc: "Acting fast during a digital emergency to block cyber attackers, lock down stolen files, and keep data safe.", img: "https://images.unsplash.com/photo-1510511459019-5dee997dd1db?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Cyber Security", title: "Protecting Passwords & Accounts", desc: "Designing secure login screens, two-step verification codes, and encrypted vaults for secret company info.", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=600&q=80" },
+
+                // Data Engineering
+                { domain: "Data Engineering & Analytics", title: "Cleaning Big Messy Data", desc: "Collecting millions of raw user data points from everywhere and organizing them into clean, easy-to-read lists.", img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Data Engineering & Analytics", title: "Building Digital Storage Vaults", desc: "Designing huge digital storage centers where a company can safely keep all its historic business records.", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Data Engineering & Analytics", title: "Automating Data Reports", desc: "Building automatic pipelines that update daily sales numbers and show them on clear dashboards for managers.", img: "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=600&q=80" }
+            ]
+        },
+
+        business: {
+            fieldName: "Business & Management",
+            domains: {
+                "Product Management": {
+                    desc: "You act as the 'captain' of a digital product—guiding software developers and designers to build features that users will love.",
+                    roles: ["Product Manager", "Associate PM", "Product Planner", "Scrum Master"]
+                },
+                "Performance Marketing & Growth": {
+                    desc: "You enjoy finding creative ways to get millions of people to notice a brand, download an app, or buy products online.",
+                    roles: ["Growth Specialist", "Digital Marketer", "Social Media Strategist", "Ad Specialist"]
+                },
+                "HR & Talent Operations": {
+                    desc: "You like working with people—interviewing talent, keeping team morale high, and creating a fun, fair place to work.",
+                    roles: ["Recruiter", "HR Partner", "Team Lead", "Talent Specialist"]
+                },
+                "Operations & Supply Chain": {
+                    desc: "You enjoy organizing the step-by-step journey of products—making sure items are made, stored, and delivered as fast as possible.",
+                    roles: ["Operations Manager", "Supply Chain Analyst", "Logistics Planner", "Process Expert"]
+                },
+                "Strategy & Management Consulting": {
+                    desc: "You like looking at big business problems, figuring out why a company is losing money, and giving expert advice on how to fix it.",
+                    roles: ["Business Consultant", "Strategy Analyst", "Problem Solver", "Operations Planner"]
+                }
+            },
+            scenarios: [
+                // Product Management
+                { domain: "Product Management", title: "Deciding What to Build Next", desc: "Choosing which new app button or feature to work on first based on what customers are asking for most.", img: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Product Management", title: "Talking to App Users", desc: "Interviewing users to see what annoys them about an app, then drawing quick ideas on paper for how to make it easier.", img: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Product Management", title: "Leading Team Meetings", desc: "Bringing designers, programmers, and marketers together in quick morning meetings to help everyone work as a team.", img: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=600&q=80" },
+
+                // Marketing
+                { domain: "Performance Marketing & Growth", title: "Testing Online Ads", desc: "Running different photos and captions on Instagram/Meta ads to see which ones get the most clicks for the lowest cost.", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Performance Marketing & Growth", title: "Going Viral on Social Media", desc: "Creating fun trends, videos, and campaigns that get thousands of people talking about your company online.", img: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Performance Marketing & Growth", title: "Fixing Lost Sales", desc: "Checking where users stop clicking during online shopping and making small layout tweaks so more people actually complete their order.", img: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=600&q=80" },
+
+                // HR
+                { domain: "HR & Talent Operations", title: "Interviewing & Hiring", desc: "Searching for talented candidates, interviewing them, and offering them exciting job opportunities at your company.", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80" },
+                { domain: "HR & Talent Operations", title: "Building Happy Team Culture", desc: "Planning fun team events, setting up friendly workplace rules, and making sure employees enjoy coming to work.", img: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=600&q=80" },
+                { domain: "HR & Talent Operations", title: "Supporting Employees", desc: "Helping employees grow their careers, rewarding top performers, and calmly solving any workplace misunderstandings.", img: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80" },
+
+                // Operations
+                { domain: "Operations & Supply Chain", title: "Speeding Up Deliveries", desc: "Finding the fastest truck routes and smartest warehouse layouts so online orders arrive at customer homes in 1 day instead of 3.", img: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Operations & Supply Chain", title: "Negotiating Prices", desc: "Meeting with suppliers to buy parts and packaging in bulk so your business saves money on every product made.", img: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Operations & Supply Chain", title: "Cutting Waste at Work", desc: "Checking factory or office steps to remove useless delays and make daily tasks run like a well-oiled machine.", img: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80" },
+
+                // Strategy
+                { domain: "Strategy & Management Consulting", title: "Company Buying Deals", desc: "Helping two big businesses join together and figuring out how their combined teams can work together smoothly.", img: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Strategy & Management Consulting", title: "Expanding to New Countries", desc: "Studying foreign markets to tell company bosses if it's a good idea to start selling products in a new country.", img: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Strategy & Management Consulting", title: "Saving a Struggling Business", desc: "Investigating why a company is losing money and presenting a clear step-by-step plan to get it back on track.", img: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=600&q=80" }
+            ]
+        },
+
+        finance: {
+            fieldName: "Finance, Investment & Fintech",
+            domains: {
+                "Investment Banking & M&A": {
+                    desc: "You enjoy working on big corporate deals—helping large companies raise millions of dollars, launch on the stock market, or buy other businesses.",
+                    roles: ["Investment Analyst", "Deal Specialist", "Valuation Analyst", "Capital Assistant"]
+                },
+                "Corporate Finance & Planning": {
+                    desc: "You like managing a company's internal wallet—planning yearly budgets, tracking monthly spending, and ensuring the business stays profitable.",
+                    roles: ["Finance Manager", "Budget Analyst", "Financial Controller", "Treasury Analyst"]
+                },
+                "Fintech & Quantitative Finance": {
+                    desc: "You like combining math, coding, and finance—building super-fast modern payment apps, crypto tech, or automatic trading scripts.",
+                    roles: ["Fintech Specialist", "Quant Analyst", "Payment Product Lead", "Crypto Tech Analyst"]
+                },
+                "Equity Research & Asset Mgmt": {
+                    desc: "You enjoy studying company news, analyzing stock charts, and helping people decide where to invest their money wisely.",
+                    roles: ["Stock Analyst", "Portfolio Assistant", "Investment Advisor", "Market Researcher"]
+                },
+                "Risk Management & Compliance": {
+                    desc: "You act like a financial inspector—checking loans, stopping fraud, and making sure bank rules and money laws are strictly followed.",
+                    roles: ["Risk Inspector", "Compliance Officer", "Fraud Detective", "Bank Auditor"]
+                }
+            },
+            scenarios: [
+                // Investment Banking
+                { domain: "Investment Banking & M&A", title: "Calculating Company Value", desc: "Using spreadsheets to estimate what a company is truly worth before a big buyer pays money to acquire it.", img: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Investment Banking & M&A", title: "Preparing Stock Market Launches", desc: "Creating slide presentations for private companies that want to start selling their shares publicly to the world.", img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Investment Banking & M&A", title: "Structuring Big Loan Deals", desc: "Helping investors gather funds and bank loans so they can buy out an entire business.", img: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80" },
+
+                // Corporate Finance
+                { domain: "Corporate Finance & Planning", title: "Setting Office Budgets", desc: "Deciding how much money different departments (like Tech or Marketing) get to spend each month.", img: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Corporate Finance & Planning", title: "Tracking Company Cash", desc: "Checking daily bank accounts to make sure the company always has enough cash to pay bills and worker salaries.", img: "https://images.unsplash.com/photo-1554224154-26032ffc0d07?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Corporate Finance & Planning", title: "Finding Extra Profits", desc: "Looking closely at company receipts to stop wasteful spending and help the business save money.", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80" },
+
+                // Fintech
+                { domain: "Fintech & Quantitative Finance", title: "Automated Stock Trading", desc: "Writing simple computer code that automatically buys or sells stocks in milliseconds when prices change.", img: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Fintech & Quantitative Finance", title: "Building Payment Apps", desc: "Designing quick digital payment features (like Google Pay or Apple Pay) for modern phone apps.", img: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Fintech & Quantitative Finance", title: "Testing Digital Wallet Tech", desc: "Checking how secure digital currency, crypto wallets, and online banking systems are against bugs.", img: "https://images.unsplash.com/photo-1621416894569-0f39ed31d247?auto=format&fit=crop&w=600&q=80" },
+
+                // Equity Research
+                { domain: "Equity Research & Asset Mgmt", title: "Stock Buy/Sell Advice", desc: "Reading tech company reports and telling investors whether they should buy or sell a specific company's stock.", img: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Equity Research & Asset Mgmt", title: "Building Investment Portfolios", desc: "Mixing investments across stocks, gold, and real estate so people earn money safely without taking crazy risks.", img: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Equity Research & Asset Mgmt", title: "Following Market Trends", desc: "Watching world news and interest rate changes to predict which industries will grow faster next year.", img: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=600&q=80" },
+
+                // Risk Mgmt
+                { domain: "Risk Management & Compliance", title: "Checking Loan Applicants", desc: "Looking at a person's credit history before giving them a loan to make sure they can pay it back safely.", img: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Risk Management & Compliance", title: "Catching Bank Fraud", desc: "Monitoring strange money transfers in bank accounts to stop scammers and protect customer savings.", img: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80" },
+                { domain: "Risk Management & Compliance", title: "Testing Bank Safety", desc: "Simulating a sudden market crash to test if a bank holds enough backup cash to survive the crisis.", img: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=600&q=80" }
+            ]
+        }
+    };
+
+    // -------------------------------------------------------------
+    // STATE MANAGEMENT
+    // -------------------------------------------------------------
+    let currentFieldKey = "";
+    let activeScenarios = [];
+    let currentIndex = 0;
+    let domainScores = {};
+    let totalLikes = 0;
+
+    // -------------------------------------------------------------
+    // LOGIC FUNCTIONS
+    // -------------------------------------------------------------
+    function startAssessment(fieldKey) {
+        currentFieldKey = fieldKey;
+        const fieldData = database[fieldKey];
+        
+        activeScenarios = fieldData.scenarios;
+        currentIndex = 0;
+        totalLikes = 0;
+
+        // Initialize score map for domains in selected field
+        domainScores = {};
+        Object.keys(fieldData.domains).forEach(dom => {
+            domainScores[dom] = 0;
+        });
+
+        // Switch screens
+        document.getElementById('screen-fields').classList.add('hidden');
+        document.getElementById('screen-cards').classList.remove('hidden');
+
+        document.getElementById('main-heading').innerText = fieldData.fieldName;
+        document.getElementById('sub-heading').innerText = "Swipe through tasks to find what sounds fun to you.";
+
+        showCard();
+    }
+
+    function showCard() {
+        if (currentIndex >= activeScenarios.length) {
+            renderResult();
+            return;
+        }
+
+        const current = activeScenarios[currentIndex];
+        document.getElementById('card-img').src = current.img;
+        document.getElementById('card-title').innerText = current.title;
+        document.getElementById('card-desc').innerText = current.desc;
+        document.getElementById('domain-badge').innerText = current.domain;
+
+        const progress = (currentIndex / activeScenarios.length) * 100;
+        document.getElementById('progress-fill').style.width = progress + '%';
+    }
+
+    function handleChoice(isLiked) {
+        const current = activeScenarios[currentIndex];
+        if (isLiked) {
+            domainScores[current.domain] = (domainScores[current.domain] || 0) + 1;
+            totalLikes += 1;
+        }
+
+        currentIndex++;
+        showCard();
+    }
+
+    function renderResult() {
+        document.getElementById('screen-cards').classList.add('hidden');
+        document.getElementById('screen-result').classList.remove('hidden');
+
+        document.getElementById('main-heading').innerText = "Your Recommended Domain";
+        document.getElementById('sub-heading').innerText = "Based on the tasks you enjoyed during the quiz.";
+
+        const fieldData = database[currentFieldKey];
+        const breakdownSection = document.getElementById('breakdown-section');
+
+        // Guard: If student passed on everything
+        if (totalLikes === 0) {
+            document.getElementById('res-title').innerText = "No Clear Match Yet";
+            document.getElementById('res-desc').innerText = "You selected 'Not for me' for all scenarios. Try running the quiz again and choosing 'Love the vibe' for tasks that sound even slightly interesting!";
+            breakdownSection.style.display = "none";
+            return;
+        }
+
+        breakdownSection.style.display = "block";
+
+        // Calculate highest score
+        const maxScore = Math.max(...Object.values(domainScores));
+        const topDomains = Object.keys(domainScores).filter(d => domainScores[d] === maxScore);
+
+        // Render Title & Description based on Single vs Tie Match
+        if (topDomains.length === 1) {
+            const winner = topDomains[0];
+            const info = fieldData.domains[winner];
+            document.getElementById('res-title').innerText = `Best Match: ${winner}`;
+            document.getElementById('res-desc').innerText = info.desc;
+            renderTags(info.roles);
+        } else if (topDomains.length === 2) {
+            const d1 = topDomains[0];
+            const d2 = topDomains[1];
+            document.getElementById('res-title').innerText = `Dual Match: ${d1} & ${d2}`;
+            document.getElementById('res-desc').innerText = `You have equal interest in both ${d1} and ${d2}! You would do great in hybrid career paths that combine both of these areas.`;
+            
+            const combinedRoles = [
+                ...fieldData.domains[d1].roles.slice(0, 2),
+                ...fieldData.domains[d2].roles.slice(0, 2)
+            ];
+            renderTags(combinedRoles);
+        } else {
+            document.getElementById('res-title').innerText = "Versatile / Multi-Skilled Profile";
+            document.getElementById('res-desc').innerText = "You enjoyed tasks across many different areas! Flexible leadership, project management, or consulting roles would suit you really well.";
+            
+            let allRoles = [];
+            topDomains.forEach(dom => {
+                allRoles.push(fieldData.domains[dom].roles[0]);
+            });
+            renderTags(allRoles);
+        }
+
+        // Render Progress Bars for all 5 domains
+        const barContainer = document.getElementById('score-bars-container');
+        barContainer.innerHTML = "";
+
+        Object.keys(domainScores).forEach(domName => {
+            const scoreCount = domainScores[domName]; // Out of 3 max
+            const percentage = Math.round((scoreCount / 3) * 100);
+
+            const scoreItem = document.createElement('div');
+            scoreItem.className = 'score-item';
+            scoreItem.innerHTML = `
+                <div class="score-header">
+                    <span>${domName}</span>
+                    <span>${percentage}%</span>
+                </div>
+                <div class="score-track">
+                    <div class="score-fill" style="width: ${percentage}%;"></div>
+                </div>
+            `;
+            barContainer.appendChild(scoreItem);
+        });
+    }
+
+    function renderTags(roles) {
+        const tagContainer = document.getElementById('tag-container');
+        tagContainer.innerHTML = "";
+        roles.forEach(role => {
+            const span = document.createElement('span');
+            span.className = 'tag';
+            span.innerText = role;
+            tagContainer.appendChild(span);
+        });
+    }
+
+    function resetApp() {
+        document.getElementById('screen-result').classList.add('hidden');
+        document.getElementById('screen-cards').classList.add('hidden');
+        document.getElementById('screen-fields').classList.remove('hidden');
+
+        document.getElementById('main-heading').innerText = "Domain Finder";
+        document.getElementById('sub-heading').innerText = "Discover your ideal career path in simple, everyday language.";
+    }
+</script>
+</body>
+</html>
